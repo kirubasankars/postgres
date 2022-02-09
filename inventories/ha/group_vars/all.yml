@@ -1,0 +1,23 @@
+---
+# Cluster-wide settings shared by ZooKeeper and PostgreSQL.
+
+cluster_name: postgres-ha
+cluster_namespace: /service/
+
+# Private network used for replication, ZooKeeper, and Patroni REST.
+cluster_network: 10.20.30.0/24
+
+# Node list used by templates (zoo.cfg, patroni.yml).
+cluster_nodes:
+  - name: pg-zk-01
+    ip: 10.20.30.11
+    zk_id: 1
+  - name: pg-zk-02
+    ip: 10.20.30.12
+    zk_id: 2
+  - name: pg-zk-03
+    ip: 10.20.30.13
+    zk_id: 3
+
+timezone: UTC
+ntp_enabled: true
