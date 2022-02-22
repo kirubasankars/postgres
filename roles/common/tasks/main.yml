@@ -1,0 +1,3 @@
+---
+- name: Apply package baseline
+  ansible.builtin.include_tasks: packages.yml
