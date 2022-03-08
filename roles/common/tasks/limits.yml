@@ -1,0 +1,8 @@
+---
+- name: Raise nofile and nproc limits for cluster users
+  ansible.builtin.template:
+    src: limits.conf.j2
+    dest: /etc/security/limits.d/99-postgres-ha.conf
+    owner: root
+    group: root
+    mode: "0644"

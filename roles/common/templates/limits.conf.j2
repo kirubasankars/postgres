@@ -1,0 +1,11 @@
+# Raised limits for Patroni, PostgreSQL, and ZooKeeper.
+postgres   soft    nofile  65536
+postgres   hard    nofile  65536
+postgres   soft    nproc   65536
+postgres   hard    nproc   65536
+zookeeper  soft    nofile  65536
+zookeeper  hard    nofile  65536
+zookeeper  soft    nproc   4096
+zookeeper  hard    nproc   4096
+*          soft    nofile  65536
+*          hard    nofile  65536
