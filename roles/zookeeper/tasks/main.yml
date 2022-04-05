@@ -1,0 +1,3 @@
+---
+- name: Install ZooKeeper binaries
+  ansible.builtin.include_tasks: install.yml
