@@ -1,0 +1,39 @@
+---
+- name: Look up this node's ZooKeeper id
+  ansible.builtin.set_fact:
+    zookeeper_myid: "{{ (cluster_nodes | selectattr('name', 'equalto', inventory_hostname) | list | first).zk_id }}"
+
+- name: Write myid
+  ansible.builtin.copy:
+    dest: "{{ zookeeper_data_dir }}/myid"
+    content: "{{ zookeeper_myid }}\n"
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: "0644"
+
+- name: Render zoo.cfg
+  ansible.builtin.template:
+    src: zoo.cfg.j2
+    dest: "{{ zookeeper_current_dir }}/conf/zoo.cfg"
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: "0644"
+  notify: restart zookeeper
+
+- name: Render log4j.properties
+  ansible.builtin.template:
+    src: log4j.properties.j2
+    dest: "{{ zookeeper_current_dir }}/conf/log4j.properties"
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: "0644"
+  notify: restart zookeeper
+
+- name: Render java.env
+  ansible.builtin.template:
+    src: java.env.j2
+    dest: "{{ zookeeper_current_dir }}/conf/java.env"
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: "0644"
+  notify: restart zookeeper
