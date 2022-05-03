@@ -1,0 +1,23 @@
+[Unit]
+Description=Apache ZooKeeper
+Documentation=https://zookeeper.apache.org
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User={{ zookeeper_user }}
+Group={{ zookeeper_group }}
+Environment=ZOOBINDIR={{ zookeeper_current_dir }}/bin
+Environment=ZOOCFGDIR={{ zookeeper_current_dir }}/conf
+Environment=ZOO_LOG_DIR={{ zookeeper_log_dir }}
+ExecStart={{ zookeeper_current_dir }}/bin/zkServer.sh start
+ExecStop={{ zookeeper_current_dir }}/bin/zkServer.sh stop
+ExecReload={{ zookeeper_current_dir }}/bin/zkServer.sh restart
+TimeoutSec=30
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
