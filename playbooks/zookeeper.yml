@@ -1,0 +1,23 @@
+---
+- name: Deploy three-node ZooKeeper ensemble
+  hosts: zookeeper
+  become: true
+  serial: 1
+  any_errors_fatal: true
+  roles:
+    - role: common
+    - role: java
+    - role: zookeeper
+  post_tasks:
+    - name: Wait for client port
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ zookeeper_client_port }}"
+        delay: 2
+        timeout: 45
+
+    - name: Confirm ruok
+      ansible.builtin.shell: echo ruok | nc -w 3 127.0.0.1 {{ zookeeper_client_port }}
+      register: zk_ruok
+      changed_when: false
+      failed_when: zk_ruok.stdout != "imok"
