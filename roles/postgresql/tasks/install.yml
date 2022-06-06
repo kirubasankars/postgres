@@ -1,0 +1,29 @@
+---
+- name: Install PostgreSQL server packages
+  ansible.builtin.apt:
+    name:
+      - "{{ postgresql_package }}={{ postgresql_package_version }}"
+      - postgresql-contrib
+      - python3-psycopg2
+      - libpq-dev
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    allow_downgrade: true
+  when: ansible_os_family == "Debian"
+
+- name: Stop and disable distro postgresql unit
+  ansible.builtin.systemd:
+    name: postgresql
+    state: stopped
+    enabled: false
+  failed_when: false
+  when: not postgresql_manage_service
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_data_dir }}"
+    state: directory
+    owner: "{{ postgresql_unix_user }}"
+    group: "{{ postgresql_unix_group }}"
+    mode: "0700"
