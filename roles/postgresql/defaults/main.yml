@@ -1,0 +1,14 @@
+---
+# PostgreSQL 14.3 released 2022-05-12 — current 14 minor as of this commit.
+postgresql_version: 14
+postgresql_full_version: "14.3"
+postgresql_package: "postgresql-{{ postgresql_version }}"
+postgresql_package_version: "{{ postgresql_full_version }}*"
+postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+postgresql_bin_dir: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+postgresql_config_dir: "/etc/postgresql/{{ postgresql_version }}/main"
+postgresql_port: 5432
+postgresql_unix_user: postgres
+postgresql_unix_group: postgres
+# Distro postgresql.service must stay disabled — Patroni starts postgres.
+postgresql_manage_service: false
