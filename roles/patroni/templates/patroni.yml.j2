@@ -1,0 +1,70 @@
+scope: {{ patroni_scope }}
+namespace: {{ patroni_namespace }}
+name: {{ patroni_name }}
+
+restapi:
+  listen: {{ patroni_rest_listen }}
+  connect_address: {{ patroni_rest_connect }}
+
+zookeeper:
+  hosts:
+{% for node in cluster_nodes %}
+    - {{ node.name }}:{{ zookeeper_client_port | default(2181) }}
+{% endfor %}
+
+bootstrap:
+  dcs:
+    ttl: {{ patroni_ttl }}
+    loop_wait: {{ patroni_loop_wait }}
+    retry_timeout: {{ patroni_retry_timeout }}
+    maximum_lag_on_failover: {{ patroni_maximum_lag_on_failover }}
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        wal_level: replica
+        hot_standby: "on"
+        wal_keep_size: 1GB
+        max_wal_senders: 10
+        max_replication_slots: 10
+        wal_log_hints: "on"
+        archive_mode: "on"
+        archive_command: /bin/true
+        max_connections: {{ postgres_max_connections | default(200) }}
+        shared_buffers: {{ postgres_shared_buffers | default('256MB') }}
+        listen_addresses: "*"
+        port: {{ postgresql_port | default(5432) }}
+  initdb:
+    - encoding: UTF8
+    - data-checksums
+  pg_hba:
+    - local all postgres peer
+    - host replication {{ postgres_replicator_user }} {{ cluster_network }} md5
+    - host replication {{ postgres_replicator_user }} 127.0.0.1/32 md5
+    - host all all {{ cluster_network }} md5
+    - host all all 127.0.0.1/32 md5
+
+postgresql:
+  listen: 0.0.0.0:{{ postgresql_port | default(5432) }}
+  connect_address: {{ postgres_connect_address }}
+  data_dir: {{ postgresql_data_dir }}
+  bin_dir: {{ postgresql_bin_dir }}
+  pgpass: /var/lib/postgresql/.pgpass
+  authentication:
+    replication:
+      username: {{ postgres_replicator_user }}
+      password: {{ postgres_replicator_password }}
+    superuser:
+      username: {{ postgres_superuser }}
+      password: {{ postgres_superuser_password }}
+  parameters:
+    unix_socket_directories: /var/run/postgresql
+
+watchdog:
+  mode: off
+
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false
