@@ -4,3 +4,6 @@
 
 - name: Configure Patroni
   ansible.builtin.include_tasks: configure.yml
+
+- name: Manage Patroni service
+  ansible.builtin.include_tasks: service.yml
