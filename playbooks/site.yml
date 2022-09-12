@@ -1,0 +1,9 @@
+---
+# Full cluster bring-up: ZooKeeper quorum first, then Patroni/Postgres.
+# Run with: ansible-playbook playbooks/site.yml
+
+- name: Import ZooKeeper ensemble playbook
+  ansible.builtin.import_playbook: zookeeper.yml
+
+- name: Import PostgreSQL / Patroni playbook
+  ansible.builtin.import_playbook: postgres.yml
