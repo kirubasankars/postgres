@@ -10,4 +10,7 @@ common_packages:
   - tar
   - vim-tiny
   - net-tools
+  - netcat-openbsd
   - lsof
+
+common_enable_firewall: true
