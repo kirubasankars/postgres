@@ -10,3 +10,7 @@
 
 - name: Apply cluster hostnames
   ansible.builtin.include_tasks: hosts.yml
+
+- name: Apply host firewall
+  ansible.builtin.include_tasks: firewall.yml
+  when: common_enable_firewall | bool
