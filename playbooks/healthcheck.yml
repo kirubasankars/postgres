@@ -1,0 +1,35 @@
+---
+- name: Check ZooKeeper ensemble health
+  hosts: zookeeper
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Query ruok
+      ansible.builtin.shell: echo ruok | nc -w 3 127.0.0.1 {{ zookeeper_client_port | default(2181) }}
+      register: zk_ruok
+      changed_when: false
+      failed_when: zk_ruok.stdout != "imok"
+
+    - name: Query srvr
+      ansible.builtin.shell: echo srvr | nc -w 3 127.0.0.1 {{ zookeeper_client_port | default(2181) }}
+      register: zk_srvr
+      changed_when: false
+
+    - name: Show ZooKeeper mode
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} ruok={{ zk_ruok.stdout }} {{ zk_srvr.stdout_lines | select('match', '^Mode:') | list }}"
+
+- name: Check Patroni / PostgreSQL cluster health
+  hosts: postgres
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Read Patroni cluster status
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host | default(inventory_hostname) }}:{{ patroni_rest_port | default(8008) }}/cluster"
+        return_content: true
+      register: patroni_cluster
+
+    - name: Show member role
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} members={{ patroni_cluster.json.members | default([]) | map(attribute='name') | list }}"
