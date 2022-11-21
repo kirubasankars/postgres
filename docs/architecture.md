@@ -43,3 +43,4 @@ a live HA cluster across a major version is a separate project.
 | 14.3  | 2022-05-12 |
 | 14.4  | 2022-06-16 |
 | 14.5  | 2022-08-11 |
+| 14.6  | 2022-11-10 |
