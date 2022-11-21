@@ -2,9 +2,9 @@
 # PostgreSQL / Patroni settings for the postgres inventory group.
 # Replace passwords before a real deploy; prefer ansible-vault.
 
-# 14.5 released 2022-08-11 — current 14 minor as of this commit.
+# 14.6 released 2022-11-10 — current 14 minor as of this commit.
 postgresql_version: 14
-postgresql_full_version: "14.5"
+postgresql_full_version: "14.6"
 postgresql_port: 5432
 postgres_max_connections: 200
 postgres_shared_buffers: 256MB

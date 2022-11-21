@@ -1,0 +1,5 @@
+---
+# Copy to a vaulted file and encrypt:
+#   ansible-vault encrypt inventories/ha/group_vars/vault.yml
+postgres_superuser_password: change-me-superuser
+postgres_replicator_password: change-me-replicator
