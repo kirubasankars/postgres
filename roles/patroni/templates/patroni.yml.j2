@@ -39,10 +39,10 @@ bootstrap:
     - data-checksums
   pg_hba:
     - local all postgres peer
-    - host replication {{ postgres_replicator_user }} {{ cluster_network }} md5
-    - host replication {{ postgres_replicator_user }} 127.0.0.1/32 md5
-    - host all all {{ cluster_network }} md5
-    - host all all 127.0.0.1/32 md5
+    - host replication {{ postgres_replicator_user }} {{ cluster_network }} scram-sha-256
+    - host replication {{ postgres_replicator_user }} 127.0.0.1/32 scram-sha-256
+    - host all all {{ cluster_network }} scram-sha-256
+    - host all all 127.0.0.1/32 scram-sha-256
 
 postgresql:
   listen: 0.0.0.0:{{ postgresql_port | default(5432) }}
