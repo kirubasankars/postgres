@@ -1,7 +1,10 @@
 ---
-patroni_version: 2.1.4
+# PostgreSQL 16 support arrived in Patroni 3.0.3, and pg_rewind on v16+
+# was only fixed later in the 3.x series. use_pg_rewind is on, so stay
+# on a 4.x release rather than the 2.1.x line this repo started with.
+patroni_version: 4.0.6
 patroni_package: "patroni=={{ patroni_version }}"
-patroni_kazoo_package: kazoo==2.8.0
+patroni_kazoo_package: kazoo==2.10.0
 patroni_user: postgres
 patroni_group: postgres
 patroni_config_dir: /etc/patroni

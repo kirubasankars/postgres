@@ -19,8 +19,10 @@ On any node:
 
 ```
 patronictl -c /etc/patroni/patroni.yml list
-patronictl -c /etc/patroni/patroni.yml switchover --master pg-zk-01 --candidate pg-zk-02
+patronictl -c /etc/patroni/patroni.yml switchover --primary pg-zk-01 --candidate pg-zk-02
 ```
+
+Patroni 4 removed the old `--master` spelling; use `--primary`.
 
 Confirm ZooKeeper still has a leader (`echo srvr | nc 127.0.0.1 2181`)
 before switching. A ZooKeeper minority (2 of 3 down) blocks failover
