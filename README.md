@@ -17,31 +17,33 @@ scripts/            cluster-status.sh
 Each VM (`pg-zk-01`, `pg-zk-02`, `pg-zk-03`) runs:
 
 - ZooKeeper 3.8.0 on 2181 / 2888 / 3888
-- Patroni 2.1.4 on 8008
-- PostgreSQL 14.6 on 5432
+- Patroni 4.0.6 on 8008
+- PostgreSQL 16.10 on 5432
 
-## Versions (released at the time of this work)
+## Versions
 
-Pins follow upstream dates. The playbooks never reference a build
-that had not been published yet.
+| Component   | Pin    | Released   | Why this line                          |
+|-------------|--------|------------|----------------------------------------|
+| Ubuntu      | 22.04  | 2022-04-21 | PGDG dropped focal; jammy-pgdg is live |
+| PostgreSQL  | 16.10  | 2025-08-14 | Latest 16 minor at time of this change |
+| Patroni     | 4.0.6  | 2025-06-06 | PG16 needs >= 3.0.3 plus rewind fixes  |
+| kazoo       | 2.10.0 | 2024-01-28 | Patroni ZooKeeper DCS client           |
+| ZooKeeper   | 3.8.0  | 2022-03-07 | Ensemble binary, checksum pinned       |
+| OpenJDK     | 11     | LTS        | Required by ZooKeeper 3.8              |
+| Ansible     | 2.12+  | 2021-11-08 | ansible-core 2.12 or newer             |
 
-| Component   | Pin    | Released   | Why this line                         |
-|-------------|--------|------------|---------------------------------------|
-| Ubuntu      | 20.04  | 2020-04-23 | Common 2022 LTS guest                 |
-| ZooKeeper   | 3.8.0  | 2022-03-07 | Current 3.8; 3.8.1 is 2023-01-25      |
-| PostgreSQL  | 14.6   | 2022-11-10 | Latest 14 minor in 2022; 15.0 skipped |
-| Patroni     | 2.1.4  | 2022-06-01 | Last 2.1.x of 2022                    |
-| kazoo       | 2.8.0  | 2019-01-15 | Patroni ZooKeeper DCS client          |
-| OpenJDK     | 11     | LTS        | Required by ZooKeeper 3.8             |
-| Ansible     | 2.12+  | 2021-11-08 | ansible-core 2.12 line                |
+Ubuntu 20.04 is no longer usable: `apt.postgresql.org` has removed
+`focal-pgdg`, so the repository 404s. The role checks
+`ansible_distribution_release` against the suites PGDG still
+publishes and fails with that explanation rather than an apt error.
 
-PostgreSQL 14 minors applied as they shipped: 14.3 (2022-05-12),
-14.4 (2022-06-16), 14.5 (2022-08-11), 14.6 (2022-11-10). ZooKeeper
-started from 3.7.0 (2021-03-27) and moved to 3.8.0 after 2022-03-07.
+The commit history walks the 2022 stack this repo started from
+(PostgreSQL 14.3 through 14.6, ZooKeeper 3.7.0 then 3.8.0), with
+each pin matching a release that had actually shipped at the time.
 
 ## Prerequisites
 
-- Three Ubuntu 20.04 VMs with SSH as `ubuntu` and passwordless sudo
+- Three Ubuntu 22.04 VMs with SSH as `ubuntu` and passwordless sudo
 - Python 3 on the control node
 - Ansible 2.12 or newer
 
