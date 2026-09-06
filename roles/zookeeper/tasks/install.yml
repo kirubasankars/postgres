@@ -1,4 +1,14 @@
 ---
+- name: Require a published checksum for this ZooKeeper version
+  ansible.builtin.assert:
+    that:
+      - zookeeper_version in zookeeper_checksums
+    fail_msg: >-
+      No SHA-512 recorded for ZooKeeper {{ zookeeper_version }}. Add it to
+      zookeeper_checksums from
+      {{ zookeeper_mirror }}/zookeeper-{{ zookeeper_version }}/{{ zookeeper_tarball }}.sha512
+    quiet: true
+
 - name: Create ZooKeeper group
   ansible.builtin.group:
     name: "{{ zookeeper_group }}"

@@ -4,8 +4,14 @@ zookeeper_version: 3.8.0
 zookeeper_mirror: https://archive.apache.org/dist/zookeeper
 zookeeper_tarball: "apache-zookeeper-{{ zookeeper_version }}-bin.tar.gz"
 zookeeper_url: "{{ zookeeper_mirror }}/zookeeper-{{ zookeeper_version }}/{{ zookeeper_tarball }}"
-# SHA-512 from https://archive.apache.org/dist/zookeeper/zookeeper-3.8.0/
-zookeeper_checksum: "sha512:d66e3a40451f840406901b2cd940992b001f92049a372ae48d8b420891605871cd1ae5f6cceb3b10665491e7abef36a4078dace158bd1e0938fcd3567b5234ca"
+# Published SHA-512 sums, keyed by version. Add an entry before bumping
+# zookeeper_version; the preflight check reports a missing one instead of
+# failing later with a checksum mismatch on a correct download.
+# https://archive.apache.org/dist/zookeeper/zookeeper-<version>/
+zookeeper_checksums:
+  "3.7.0": "sha512:64e2701c019ed46f45f4d53b2c5eaeaf7cf48c342bbafa032a0819d527fc77caebfada6bdad34e5171e6d838f40b16c95b62ce378b53dfc827af2d60cec0b17c"
+  "3.8.0": "sha512:d66e3a40451f840406901b2cd940992b001f92049a372ae48d8b420891605871cd1ae5f6cceb3b10665491e7abef36a4078dace158bd1e0938fcd3567b5234ca"
+zookeeper_checksum: "{{ zookeeper_checksums[zookeeper_version] }}"
 zookeeper_install_dir: /opt/zookeeper
 zookeeper_current_dir: "{{ zookeeper_install_dir }}/current"
 zookeeper_data_dir: /var/lib/zookeeper
