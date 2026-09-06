@@ -1,4 +1,10 @@
 ---
-java_package_debian: openjdk-11-jre-headless
-java_package_redhat: java-11-openjdk-headless
+# Fedora 41 dropped java-11; ZooKeeper 3.8 runs on 21 as well.
+java_packages_by_family:
+  Debian: openjdk-11-jre-headless
+  RedHat: java-21-openjdk-headless
+java_package: "{{ java_packages_by_family[ansible_os_family] }}"
+
+# Fallback only. The role reads the real path back from /usr/bin/java,
+# since the JVM directory is named after the distribution's build.
 java_home: /usr/lib/jvm/java-11-openjdk-amd64

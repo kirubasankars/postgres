@@ -1,0 +1,46 @@
+---
+- name: Install firewalld
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: Enable and start firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+
+- name: Allow SSH
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: true
+    immediate: true
+    state: enabled
+
+# No equivalent of ufw's "policy: deny" is needed: a firewalld zone
+# rejects anything it was not told to accept, so listing the cluster
+# ports is enough.
+- name: Allow ZooKeeper client and peer ports from the cluster network
+  ansible.posix.firewalld:
+    rich_rule: >-
+      rule family=ipv4 source address={{ cluster_network }}
+      port port={{ item }} protocol=tcp accept
+    permanent: true
+    immediate: true
+    state: enabled
+  loop:
+    - "{{ zookeeper_client_port | default(2181) }}"
+    - "{{ zookeeper_peer_port | default(2888) }}"
+    - "{{ zookeeper_election_port | default(3888) }}"
+
+- name: Allow PostgreSQL and Patroni REST from the cluster network
+  ansible.posix.firewalld:
+    rich_rule: >-
+      rule family=ipv4 source address={{ cluster_network }}
+      port port={{ item }} protocol=tcp accept
+    permanent: true
+    immediate: true
+    state: enabled
+  loop:
+    - "{{ postgresql_port | default(5432) }}"
+    - "{{ patroni_rest_port | default(8008) }}"

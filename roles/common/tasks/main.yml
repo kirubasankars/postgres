@@ -4,12 +4,14 @@
 
 - name: Apply kernel tunables
   ansible.builtin.include_tasks: sysctl.yml
+  when: common_tune_sysctl | bool
 
 - name: Apply process limits
   ansible.builtin.include_tasks: limits.yml
 
 - name: Apply cluster hostnames
   ansible.builtin.include_tasks: hosts.yml
+  when: common_manage_hosts | bool
 
 - name: Apply host firewall
   ansible.builtin.include_tasks: firewall.yml

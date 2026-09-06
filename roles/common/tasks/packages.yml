@@ -1,5 +1,5 @@
 ---
-- name: Install base packages
+- name: Install base packages (Debian)
   ansible.builtin.apt:
     name: "{{ common_packages }}"
     state: present
@@ -7,8 +7,11 @@
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
+# ansible.builtin.package picks dnf5 on Fedora 41+ and dnf elsewhere.
+# The yum module cannot talk to libdnf5 at all, and the dnf module needs
+# the dnf4 bindings that Fedora no longer installs by default.
 - name: Install base packages (RedHat)
-  ansible.builtin.yum:
+  ansible.builtin.package:
     name: "{{ common_packages }}"
     state: present
   when: ansible_os_family == "RedHat"

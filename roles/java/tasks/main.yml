@@ -1,18 +1,25 @@
 ---
-- name: Install OpenJDK 11 (Debian)
+- name: Install a headless JRE (Debian)
   ansible.builtin.apt:
-    name: "{{ java_package_debian }}"
+    name: "{{ java_package }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
-- name: Install OpenJDK 11 (RedHat)
-  ansible.builtin.yum:
-    name: "{{ java_package_redhat }}"
+- name: Install a headless JRE (RedHat)
+  ansible.builtin.package:
+    name: "{{ java_package }}"
     state: present
   when: ansible_os_family == "RedHat"
 
+- name: Locate the installed JVM
+  ansible.builtin.command: readlink -f /usr/bin/java
+  register: java_binary
+  changed_when: false
+
+# java.env exports this for zkServer.sh. Guessing the directory name
+# breaks on every distribution that spells its JVM path differently.
 - name: Record JAVA_HOME for later roles
   ansible.builtin.set_fact:
-    java_home: "{{ java_home }}"
+    java_home: "{{ java_binary.stdout | dirname | dirname }}"

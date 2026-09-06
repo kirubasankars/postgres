@@ -1,16 +1,39 @@
 ---
-common_packages:
-  - ca-certificates
-  - curl
-  - gnupg
-  - python3
-  - python3-pip
-  - python3-setuptools
-  - unzip
-  - tar
-  - vim-tiny
-  - net-tools
-  - netcat-openbsd
-  - lsof
+# Same tools either way, different spelling: Fedora has no vim-tiny and
+# calls the OpenBSD netcat nmap-ncat.
+common_packages_by_family:
+  Debian:
+    - ca-certificates
+    - curl
+    - gnupg
+    - python3
+    - python3-pip
+    - python3-setuptools
+    - unzip
+    - tar
+    - vim-tiny
+    - net-tools
+    - netcat-openbsd
+    - lsof
+  RedHat:
+    - ca-certificates
+    - curl
+    - gnupg2
+    - python3
+    - python3-pip
+    - python3-setuptools
+    - unzip
+    - tar
+    - vim-minimal
+    - net-tools
+    - nmap-ncat
+    - lsof
+common_packages: "{{ common_packages_by_family[ansible_os_family] }}"
 
 common_enable_firewall: true
+
+# A container shares the host kernel and gets /etc/hosts from the
+# runtime, so the docker inventory turns both of these off rather than
+# writing host-wide settings from inside a guest.
+common_tune_sysctl: true
+common_manage_hosts: true

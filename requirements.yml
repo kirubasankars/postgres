@@ -1,7 +1,12 @@
 ---
-# Collections current as of late 2022.
 collections:
   - name: community.general
     version: ">=5.5.0,<6.0.0"
   - name: community.postgresql
     version: ">=2.2.0,<3.0.0"
+  # firewalld, for the Fedora and RHEL hosts.
+  - name: ansible.posix
+    version: ">=1.4.0,<2.0.0"
+  # docker connection plugin, for the inventories/docker lab only.
+  - name: community.docker
+    version: ">=3.4.0"
