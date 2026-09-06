@@ -30,6 +30,7 @@
   ansible.builtin.get_url:
     url: "{{ zookeeper_url }}"
     dest: "/tmp/{{ zookeeper_tarball }}"
+    checksum: "{{ zookeeper_checksum }}"
     mode: "0644"
     timeout: 60
 

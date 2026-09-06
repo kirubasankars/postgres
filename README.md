@@ -49,6 +49,14 @@ started from 3.7.0 (2021-03-27) and moved to 3.8.0 after 2022-03-07.
 ansible-galaxy collection install -r requirements.yml
 ```
 
+Local three-node lab (VirtualBox):
+
+```
+vagrant up
+ansible-playbook playbooks/site.yml -e ansible_user=vagrant \
+  -e ansible_ssh_private_key_file="$HOME/.vagrant.d/insecure_private_key"
+```
+
 Edit `inventories/ha/hosts.yml` so `ansible_host` matches your VMs.
 Replace the placeholder passwords in
 `inventories/ha/group_vars/postgres.yml` (or encrypt
