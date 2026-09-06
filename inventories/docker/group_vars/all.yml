@@ -1,0 +1,29 @@
+---
+# Same topology as inventories/ha: compose pins these addresses.
+
+cluster_name: postgres-ha
+cluster_namespace: /service/
+cluster_network: 10.20.30.0/24
+
+cluster_nodes:
+  - name: pg-zk-01
+    ip: 10.20.30.11
+    zk_id: 1
+  - name: pg-zk-02
+    ip: 10.20.30.12
+    zk_id: 2
+  - name: pg-zk-03
+    ip: 10.20.30.13
+    zk_id: 3
+
+timezone: UTC
+ntp_enabled: true
+
+# A container has no kernel of its own to tune and gets /etc/hosts from
+# the runtime; writing either from in here would hit the host. Nothing
+# needs the hosts file anyway, since compose resolves the node names.
+common_tune_sysctl: false
+common_manage_hosts: false
+# Port filtering belongs to the docker network, not to a firewall
+# inside a lab container.
+common_enable_firewall: false

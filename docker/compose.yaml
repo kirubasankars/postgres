@@ -1,0 +1,76 @@
+name: postgres-ha
+
+# Three Fedora containers standing in for the VMs in
+# inventories/ha/hosts.yml, on the same 10.20.30.0/24 with the same
+# names, so the playbooks and templates do not change. systemd runs as
+# PID 1 in each one and starts zookeeper.service and patroni.service.
+x-node: &node
+  build:
+    context: .
+  image: postgres-ha/fedora:43
+  # systemd wants to manage its own cgroup subtree and mount things
+  # under /run; privileged is the least fragile way to get there. These
+  # are throwaway lab nodes, not a way to run PostgreSQL in production.
+  privileged: true
+  tmpfs:
+    - /run
+    - /run/lock
+    - /tmp
+  # systemd shuts down on SIGRTMIN+3 (see STOPSIGNAL in the Dockerfile)
+  # and wants a moment to stop postgres cleanly.
+  stop_grace_period: 30s
+  # SELinux on a Fedora host denies a container access to anything the
+  # runtime bind-mounts in, /sys/fs/cgroup included.
+  security_opt:
+    - label=disable
+  # Lets `up --wait` block until systemd finished booting, which is when
+  # Ansible can start. Degraded counts: masked units report as failed.
+  healthcheck:
+    test: ["CMD-SHELL", "systemctl is-system-running | grep -qE 'running|degraded'"]
+    interval: 2s
+    timeout: 5s
+    retries: 30
+
+services:
+  pg-zk-01:
+    <<: *node
+    container_name: pg-zk-01
+    hostname: pg-zk-01
+    networks:
+      cluster:
+        ipv4_address: 10.20.30.11
+    # Host ports for psql and the Patroni REST API. Container addresses
+    # are routable from a Linux host, so these are a convenience only.
+    ports:
+      - "15432:5432"
+      - "18008:8008"
+
+  pg-zk-02:
+    <<: *node
+    container_name: pg-zk-02
+    hostname: pg-zk-02
+    networks:
+      cluster:
+        ipv4_address: 10.20.30.12
+    ports:
+      - "15433:5432"
+      - "18009:8008"
+
+  pg-zk-03:
+    <<: *node
+    container_name: pg-zk-03
+    hostname: pg-zk-03
+    networks:
+      cluster:
+        ipv4_address: 10.20.30.13
+    ports:
+      - "15434:5432"
+      - "18010:8008"
+
+networks:
+  cluster:
+    name: postgres-ha
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24

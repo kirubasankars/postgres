@@ -1,0 +1,4 @@
+---
+# Overrides applied to the zookeeper inventory group.
+zookeeper_heap: 256m
+zookeeper_client_port: 2181

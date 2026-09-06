@@ -1,0 +1,23 @@
+---
+# PostgreSQL / Patroni settings for the Fedora lab containers.
+# Replace passwords before a real deploy; prefer ansible-vault.
+
+# 16.15 released 2026-08-11. PGDG's Fedora 43 repository starts at
+# 16.13, so the 16.10 pin the Ubuntu inventory uses does not exist here.
+postgresql_version: 16
+postgresql_full_version: "16.15"
+postgresql_port: 5432
+postgres_max_connections: 200
+postgres_shared_buffers: 256MB
+
+postgres_superuser: postgres
+postgres_superuser_password: change-me-superuser
+postgres_replicator_user: replicator
+postgres_replicator_password: change-me-replicator
+
+patroni_scope: "{{ cluster_name }}"
+patroni_namespace: "{{ cluster_namespace }}"
+patroni_ttl: 30
+patroni_loop_wait: 10
+patroni_retry_timeout: 10
+patroni_maximum_lag_on_failover: 1048576
