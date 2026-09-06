@@ -1,0 +1,59 @@
+---
+- name: Deploy three-node ZooKeeper ensemble
+  hosts: zookeeper
+  become: true
+  serial: 1
+  any_errors_fatal: true
+  roles:
+    - role: common
+    - role: java
+    - role: zookeeper
+  post_tasks:
+    - name: Wait for client port
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ zookeeper_client_port }}"
+        delay: 2
+        timeout: 45
+
+    # Liveness only. ruok answers imok while the node is still LOOKING,
+    # so quorum is asserted in the next play once all nodes are up.
+    - name: Confirm the server answers ruok
+      ansible.builtin.shell: echo ruok | nc -w 3 127.0.0.1 {{ zookeeper_client_port }}
+      register: zk_ruok
+      changed_when: false
+      failed_when: zk_ruok.stdout != "imok"
+
+- name: Verify the ensemble reached quorum
+  hosts: zookeeper
+  become: true
+  gather_facts: false
+  any_errors_fatal: true
+  tasks:
+    - name: Read server state from mntr
+      ansible.builtin.shell:
+        cmd: >-
+          echo mntr | nc -w 3 127.0.0.1 {{ zookeeper_client_port | default(2181) }}
+          | awk '/^zk_server_state/ { print $2 }'
+      register: zk_state
+      changed_when: false
+      retries: 30
+      delay: 4
+      until: zk_state.stdout in ["leader", "follower"]
+
+    - name: Require exactly one leader across the ensemble
+      ansible.builtin.assert:
+        that:
+          - zk_leaders | length == 1
+          - zk_states | length == groups['zookeeper'] | length
+        fail_msg: "No single ZooKeeper leader: {{ zk_states }}"
+        success_msg: "Quorum established, leader is {{ zk_leaders | join(', ') }}"
+      run_once: true
+      vars:
+        zk_states: >-
+          {{ dict(ansible_play_hosts
+             | zip(ansible_play_hosts | map('extract', hostvars, ['zk_state', 'stdout']))) }}
+        zk_leaders: >-
+          {{ zk_states | dict2items
+             | selectattr('value', 'equalto', 'leader')
+             | map(attribute='key') | list }}

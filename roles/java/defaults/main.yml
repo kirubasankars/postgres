@@ -1,0 +1,4 @@
+---
+java_package_debian: openjdk-11-jre-headless
+java_package_redhat: java-11-openjdk-headless
+java_home: /usr/lib/jvm/java-11-openjdk-amd64

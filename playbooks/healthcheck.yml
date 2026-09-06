@@ -1,0 +1,77 @@
+---
+- name: Check ZooKeeper ensemble health
+  hosts: zookeeper
+  become: true
+  gather_facts: false
+  tasks:
+    # ruok reports only that the JVM is up and the client port is open; a
+    # node in LOOKING with no quorum still answers imok. mntr carries the
+    # real state, so quorum is judged on zk_server_state.
+    - name: Read server state from mntr
+      ansible.builtin.shell:
+        cmd: >-
+          echo mntr | nc -w 3 127.0.0.1 {{ zookeeper_client_port | default(2181) }}
+          | awk '/^zk_server_state/ { print $2 }'
+      register: zk_state
+      changed_when: false
+
+    - name: Report each node's state
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} is {{ zk_state.stdout | default('unreachable') }}"
+
+    - name: Require a quorum with exactly one leader
+      ansible.builtin.assert:
+        that:
+          - zk_leaders | length == 1
+          - zk_voters | length >= (groups['zookeeper'] | length // 2) + 1
+        fail_msg: "ZooKeeper has no usable quorum: {{ zk_states }}"
+        success_msg: "Quorum healthy, leader is {{ zk_leaders | join(', ') }}"
+      run_once: true
+      vars:
+        zk_states: >-
+          {{ dict(ansible_play_hosts
+             | zip(ansible_play_hosts | map('extract', hostvars, ['zk_state', 'stdout']))) }}
+        zk_leaders: >-
+          {{ zk_states | dict2items
+             | selectattr('value', 'equalto', 'leader')
+             | map(attribute='key') | list }}
+        zk_voters: >-
+          {{ zk_states | dict2items
+             | selectattr('value', 'in', ['leader', 'follower'])
+             | map(attribute='key') | list }}
+
+- name: Check Patroni / PostgreSQL cluster health
+  hosts: postgres
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Read Patroni cluster status
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host | default(inventory_hostname) }}:{{ patroni_rest_port | default(8008) }}/cluster"
+        return_content: true
+      register: patroni_cluster
+
+    - name: Report members as this node sees them
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} sees
+          {{ patroni_cluster.json.members
+             | map(attribute='name') | zip(patroni_cluster.json.members | map(attribute='role'))
+             | map('join', '=') | join(', ') }}
+
+    - name: Require one primary and healthy replicas
+      ansible.builtin.assert:
+        that:
+          - members | length == groups['postgres'] | length
+          - leaders | length == 1
+          - stopped | length == 0
+        fail_msg: >-
+          Unhealthy cluster: {{ leaders | length }} leader(s),
+          not running: {{ stopped }}
+        success_msg: "Primary is {{ leaders | join(', ') }}, {{ members | length - 1 }} replica(s) running"
+      vars:
+        members: "{{ patroni_cluster.json.members }}"
+        leaders: "{{ members | selectattr('role', 'equalto', 'leader') | map(attribute='name') | list }}"
+        stopped: >-
+          {{ members | rejectattr('state', 'equalto', 'running')
+             | map(attribute='name') | list }}

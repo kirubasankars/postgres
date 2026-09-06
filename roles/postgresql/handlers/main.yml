@@ -1,0 +1,4 @@
+---
+- name: restart postgresql
+  ansible.builtin.debug:
+    msg: "Patroni owns the postmaster; skip a direct postgresql restart."

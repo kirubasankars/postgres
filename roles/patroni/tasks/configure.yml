@@ -1,0 +1,9 @@
+---
+- name: Render Patroni configuration
+  ansible.builtin.template:
+    src: patroni.yml.j2
+    dest: "{{ patroni_config_file }}"
+    owner: "{{ patroni_user }}"
+    group: "{{ patroni_group }}"
+    mode: "0640"
+  notify: reload patroni
