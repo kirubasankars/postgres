@@ -1,4 +1,19 @@
 ---
+# PGDG only publishes a suite per supported distribution release, and it
+# removes them once upstream support ends: focal-pgdg is now a 404, so an
+# Ubuntu 20.04 guest fails at apt update with a confusing error. Check the
+# release before adding a repository that cannot exist.
+- name: Require a distribution release PGDG still publishes
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_release in postgresql_pgdg_releases
+    fail_msg: >-
+      No PGDG suite for {{ ansible_distribution }}
+      {{ ansible_distribution_version }} ({{ ansible_distribution_release }}-pgdg).
+      Supported: {{ postgresql_pgdg_releases | join(', ') }}.
+    quiet: true
+  when: ansible_os_family == "Debian"
+
 - name: Trust the PGDG apt key
   ansible.builtin.apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc

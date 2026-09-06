@@ -1,7 +1,7 @@
 ---
-# PostgreSQL 14.3 released 2022-05-12 — current 14 minor as of this commit.
-postgresql_version: 14
-postgresql_full_version: "14.3"
+# PostgreSQL 16.10 released 2025-08-14 — current 16 minor.
+postgresql_version: 16
+postgresql_full_version: "16.10"
 postgresql_package: "postgresql-{{ postgresql_version }}"
 postgresql_package_version: "{{ postgresql_full_version }}*"
 postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
@@ -10,6 +10,13 @@ postgresql_config_dir: "/etc/postgresql/{{ postgresql_version }}/main"
 postgresql_port: 5432
 postgresql_unix_user: postgres
 postgresql_unix_group: postgres
+# Suites currently published on apt.postgresql.org.
+postgresql_pgdg_releases:
+  - jammy
+  - noble
+  - bullseye
+  - bookworm
+  - trixie
 # Distro postgresql.service must stay disabled — Patroni starts postgres.
 postgresql_manage_service: false
 # Remove a cluster left by pg_createcluster so Patroni can run initdb.
