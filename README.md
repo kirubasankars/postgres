@@ -64,20 +64,41 @@ Replace the placeholder passwords in
 
 ## Deploy
 
+`make` wraps the playbooks; `make` on its own lists every target.
+
 ```
-# ZooKeeper quorum only
-ansible-playbook playbooks/zookeeper.yml
+make deps          # install required collections
+make syntax        # syntax-check all playbooks
+make zookeeper     # ensemble only
+make postgres      # PostgreSQL + Patroni (requires quorum)
+make deploy        # full stack, in order
+make healthcheck   # assert quorum and a single primary
+make status        # raw ZooKeeper / Patroni output
+```
 
-# PostgreSQL + Patroni (requires ZooKeeper)
-ansible-playbook playbooks/postgres.yml
+Pass Ansible flags through `FLAGS`, and point at another inventory
+with `INVENTORY`:
 
-# Full stack in order
+```
+make healthcheck INVENTORY=inventories/staging/hosts.yml
+make deploy FLAGS="--limit pg-zk-01 --check"
+```
+
+The playbooks work equally well on their own:
+
+```
 ansible-playbook playbooks/site.yml
-
-# Health
 ansible-playbook playbooks/healthcheck.yml
-scripts/cluster-status.sh
 ```
+
+## Health
+
+`make healthcheck` is a real gate, not a report. It fails when
+ZooKeeper has no voting majority, when no node is `leader`, or when
+Patroni does not show exactly one primary with every member
+`running`. `ruok` alone is not enough: a node stuck in `LOOKING`
+with no quorum still answers `imok`, so the check reads
+`zk_server_state` from `mntr` instead.
 
 ## Failover
 
