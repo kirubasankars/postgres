@@ -20,6 +20,30 @@ Each VM (`pg-zk-01`, `pg-zk-02`, `pg-zk-03`) runs:
 - Patroni 4.0.6 on 8008
 - PostgreSQL 16.10 on 5432
 
+## Recently added
+
+**PostgreSQL 16 (Sep 2025)**
+
+- Bumped to PostgreSQL 16.10 and Patroni 4.0.6
+- Guests moved to Ubuntu 22.04 (`focal-pgdg` is gone from PGDG)
+- `pg_hba` uses `scram-sha-256`
+- PGDG suite check in the `postgresql` role
+
+**Ops and lab (Sep 2026)**
+
+- `Makefile` — `make deploy`, `make healthcheck`, `make status`, …
+- `Vagrantfile` for a local three-node lab
+- ZooKeeper tarball SHA-512 keyed by version
+
+**Fixes (Sep 2026)**
+
+- Drop the apt-created `main` cluster before Patroni bootstraps
+- Health checks assert ZK quorum (`mntr`) and one Patroni primary
+- Patroni sees `PGDATA` / `bin_dir` via shared group vars
+
+Not yet run end-to-end against live VMs in CI. Use `make lab &&
+make deploy && make healthcheck` to validate on your side.
+
 ## Versions
 
 | Component   | Pin    | Released   | Why this line                          |
