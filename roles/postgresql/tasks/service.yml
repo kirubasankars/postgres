@@ -1,0 +1,29 @@
+---
+- name: Stop and disable distro postgresql units
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ postgresql_distro_units }}"
+  failed_when: false
+  when: not postgresql_manage_service
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_data_dir }}"
+    state: directory
+    owner: "{{ postgresql_unix_user }}"
+    group: "{{ postgresql_unix_group }}"
+    mode: "0700"
+
+# Both families ship a tmpfiles.d entry for this, but it only runs at
+# boot — and the packages land after boot. Patroni starts postgres with
+# unix_socket_directories pointing here, so create it now or the first
+# start fails.
+- name: Ensure the unix socket directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_socket_dir }}"
+    state: directory
+    owner: "{{ postgresql_unix_user }}"
+    group: "{{ postgresql_unix_group }}"
+    mode: "0755"

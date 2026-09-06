@@ -1,6 +1,9 @@
 ---
 - name: Configure PGDG package repository
-  ansible.builtin.include_tasks: repo.yml
+  ansible.builtin.include_tasks: "repo-{{ ansible_os_family }}.yml"
 
 - name: Install PostgreSQL packages
-  ansible.builtin.include_tasks: install.yml
+  ansible.builtin.include_tasks: "install-{{ ansible_os_family }}.yml"
+
+- name: Hand the server over to Patroni
+  ansible.builtin.include_tasks: service.yml

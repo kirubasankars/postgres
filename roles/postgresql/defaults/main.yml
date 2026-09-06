@@ -4,12 +4,40 @@ postgresql_version: 16
 postgresql_full_version: "16.10"
 postgresql_package: "postgresql-{{ postgresql_version }}"
 postgresql_package_version: "{{ postgresql_full_version }}*"
-postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
-postgresql_bin_dir: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
-postgresql_config_dir: "/etc/postgresql/{{ postgresql_version }}/main"
+
+# PGDG names the RPMs after the major and keeps the last few minors per
+# Fedora release. A release that shipped after a minor was dropped never
+# carries it, so the pin belongs in the inventory: see
+# inventories/docker/group_vars/postgres.yml.
+postgresql_rpm_packages:
+  - "postgresql{{ postgresql_version }}-server-{{ postgresql_full_version }}"
+  - "postgresql{{ postgresql_version }}-contrib-{{ postgresql_full_version }}"
+  - python3-psycopg2
+  - libpq-devel
+
+# Debian keeps the cluster under /etc and /usr/lib, PGDG's RPMs put both
+# the config and the data in PGDATA and version the bin directory.
+postgresql_paths_by_family:
+  Debian:
+    data: "/var/lib/postgresql/{{ postgresql_version }}/main"
+    bin: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+    config: "/etc/postgresql/{{ postgresql_version }}/main"
+    home: /var/lib/postgresql
+  RedHat:
+    data: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    bin: "/usr/pgsql-{{ postgresql_version }}/bin"
+    config: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    home: /var/lib/pgsql
+postgresql_data_dir: "{{ postgresql_paths_by_family[ansible_os_family].data }}"
+postgresql_bin_dir: "{{ postgresql_paths_by_family[ansible_os_family].bin }}"
+postgresql_config_dir: "{{ postgresql_paths_by_family[ansible_os_family].config }}"
+postgresql_home_dir: "{{ postgresql_paths_by_family[ansible_os_family].home }}"
+postgresql_socket_dir: /run/postgresql
+
 postgresql_port: 5432
 postgresql_unix_user: postgres
 postgresql_unix_group: postgres
+
 # Suites currently published on apt.postgresql.org.
 postgresql_pgdg_releases:
   - jammy
@@ -17,6 +45,21 @@ postgresql_pgdg_releases:
   - bullseye
   - bookworm
   - trixie
+# Fedora releases with a repository RPM on yum.postgresql.org. PGDG
+# removes these at EOL the same way it removed focal-pgdg.
+postgresql_pgdg_fedora_releases:
+  - "43"
+  - "44"
+postgresql_pgdg_reporpm_url: "https://download.postgresql.org/pub/repos/yum/reporpms/F-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}/pgdg-fedora-repo-latest.noarch.rpm"
+
+# Units the distribution ships; Patroni starts postgres itself.
+postgresql_distro_units_by_family:
+  Debian:
+    - postgresql
+    - "postgresql@{{ postgresql_version }}-main"
+  RedHat:
+    - "postgresql-{{ postgresql_version }}"
+postgresql_distro_units: "{{ postgresql_distro_units_by_family[ansible_os_family] }}"
 # Distro postgresql.service must stay disabled — Patroni starts postgres.
 postgresql_manage_service: false
 # Remove a cluster left by pg_createcluster so Patroni can run initdb.

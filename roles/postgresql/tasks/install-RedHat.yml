@@ -1,0 +1,8 @@
+---
+# Nothing here has to undo a packaged cluster: the PGDG RPMs leave
+# initdb to postgresql-setup, so PGDATA stays empty and Patroni
+# bootstraps it.
+- name: Install PostgreSQL server packages
+  ansible.builtin.package:
+    name: "{{ postgresql_rpm_packages }}"
+    state: present

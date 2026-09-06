@@ -1,0 +1,24 @@
+---
+# yum.postgresql.org drops the repository RPM for a Fedora release once
+# upstream support ends — F-42 is already gone — so check before adding
+# a repository that cannot exist, the same way the Debian path checks
+# for a published apt suite.
+- name: Require a Fedora release PGDG still publishes
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_major_version in postgresql_pgdg_fedora_releases
+    fail_msg: >-
+      No PGDG repository RPM for {{ ansible_distribution }}
+      {{ ansible_distribution_major_version }}.
+      Supported: {{ postgresql_pgdg_fedora_releases | join(', ') }}.
+    quiet: true
+  when: ansible_distribution == "Fedora"
+
+# The RPM carries the PGDG signing key, so it cannot itself be verified
+# against a key the host already trusts.
+- name: Install the PGDG repository RPM
+  ansible.builtin.package:
+    name: "{{ postgresql_pgdg_reporpm_url }}"
+    state: present
+    disable_gpg_check: true
+  when: ansible_distribution == "Fedora"

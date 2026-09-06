@@ -10,7 +10,6 @@
     state: present
     update_cache: true
     cache_valid_time: 3600
-  when: ansible_os_family == "Debian"
 
 - name: Stop postgresql-common from creating the main cluster
   ansible.builtin.lineinfile:
@@ -18,7 +17,6 @@
     regexp: '^\s*#?\s*create_main_cluster\s*='
     line: "create_main_cluster = false"
     state: present
-  when: ansible_os_family == "Debian"
 
 # postgresql-contrib is deliberately absent: the contrib modules ship inside
 # postgresql-{{ postgresql_version }}, and the unversioned metapackage
@@ -34,18 +32,6 @@
     update_cache: true
     cache_valid_time: 3600
     allow_downgrade: true
-  when: ansible_os_family == "Debian"
-
-- name: Stop and disable distro postgresql units
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: stopped
-    enabled: false
-  loop:
-    - postgresql
-    - "postgresql@{{ postgresql_version }}-main"
-  failed_when: false
-  when: not postgresql_manage_service
 
 - name: Look for a pg_createcluster-managed main cluster
   ansible.builtin.stat:
@@ -67,11 +53,3 @@
     - postgresql_packaged_cluster.stat.exists
     - not postgresql_patroni_cluster.stat.exists
   changed_when: true
-
-- name: Ensure data directory exists
-  ansible.builtin.file:
-    path: "{{ postgresql_data_dir }}"
-    state: directory
-    owner: "{{ postgresql_unix_user }}"
-    group: "{{ postgresql_unix_group }}"
-    mode: "0700"
