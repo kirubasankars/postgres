@@ -5,6 +5,21 @@
 patroni_version: 4.0.6
 patroni_package: "patroni=={{ patroni_version }}"
 patroni_kazoo_package: kazoo==2.10.0
+
+# Fedora refuses pip installs into the system interpreter, and PGDG
+# packages Patroni for it anyway. The repository carries the 4.1 line
+# only, so the RPM pin is not the same as the pip pin above; kazoo
+# arrives as a dependency of patroni-zookeeper.
+patroni_rpm_version: 4.1.5
+patroni_rpm_packages:
+  - "patroni-{{ patroni_rpm_version }}"
+  - "patroni-zookeeper-{{ patroni_rpm_version }}"
+
+patroni_bin_by_family:
+  Debian: /usr/local/bin/patroni
+  RedHat: /usr/bin/patroni
+patroni_bin: "{{ patroni_bin_by_family[ansible_os_family] }}"
+
 patroni_user: postgres
 patroni_group: postgres
 patroni_config_dir: /etc/patroni
@@ -20,9 +35,26 @@ patroni_loop_wait: 10
 patroni_retry_timeout: 10
 patroni_maximum_lag_on_failover: 1048576
 
+# Peers reach this node on the address the inventory gave it. host_vars
+# may still override either line.
+patroni_node_ip: "{{ (cluster_nodes | selectattr('name', 'equalto', inventory_hostname) | list | first).ip }}"
+patroni_rest_connect: "{{ patroni_node_ip }}:{{ patroni_rest_port }}"
+postgres_connect_address: "{{ patroni_node_ip }}:{{ postgresql_port }}"
+
 # Paths must live here (or in group_vars). PostgreSQL role defaults
 # are not visible while this role renders patroni.yml.
 postgresql_version: 16
 postgresql_port: 5432
-postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
-postgresql_bin_dir: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+postgresql_paths_by_family:
+  Debian:
+    data: "/var/lib/postgresql/{{ postgresql_version }}/main"
+    bin: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+    home: /var/lib/postgresql
+  RedHat:
+    data: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    bin: "/usr/pgsql-{{ postgresql_version }}/bin"
+    home: /var/lib/pgsql
+postgresql_data_dir: "{{ postgresql_paths_by_family[ansible_os_family].data }}"
+postgresql_bin_dir: "{{ postgresql_paths_by_family[ansible_os_family].bin }}"
+postgresql_home_dir: "{{ postgresql_paths_by_family[ansible_os_family].home }}"
+postgresql_socket_dir: /run/postgresql

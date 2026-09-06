@@ -1,21 +1,6 @@
 ---
-- name: Install Patroni build dependencies
-  ansible.builtin.apt:
-    name:
-      - python3-pip
-      - python3-dev
-      - python3-psycopg2
-      - gcc
-    state: present
-  when: ansible_os_family == "Debian"
-
-- name: Install Patroni and kazoo from PyPI
-  ansible.builtin.pip:
-    name:
-      - "{{ patroni_package }}"
-      - "{{ patroni_kazoo_package }}"
-    extra_args: --upgrade
-    executable: pip3
+- name: Install Patroni for this distribution
+  ansible.builtin.include_tasks: "install-{{ ansible_os_family }}.yml"
 
 - name: Create Patroni config and log directories
   ansible.builtin.file:

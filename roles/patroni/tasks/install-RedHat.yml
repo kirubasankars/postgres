@@ -1,0 +1,6 @@
+---
+# From the pgdg-common repository the postgresql role already added.
+- name: Install Patroni with its ZooKeeper client
+  ansible.builtin.package:
+    name: "{{ patroni_rpm_packages }}"
+    state: present

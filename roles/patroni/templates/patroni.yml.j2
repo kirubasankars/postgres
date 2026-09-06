@@ -49,7 +49,7 @@ postgresql:
   connect_address: {{ postgres_connect_address }}
   data_dir: {{ postgresql_data_dir }}
   bin_dir: {{ postgresql_bin_dir }}
-  pgpass: /var/lib/postgresql/.pgpass
+  pgpass: {{ postgresql_home_dir }}/.pgpass
   authentication:
     replication:
       username: {{ postgres_replicator_user }}
@@ -58,7 +58,7 @@ postgresql:
       username: {{ postgres_superuser }}
       password: {{ postgres_superuser_password }}
   parameters:
-    unix_socket_directories: /var/run/postgresql
+    unix_socket_directories: {{ postgresql_socket_dir }}
 
 watchdog:
   mode: off
