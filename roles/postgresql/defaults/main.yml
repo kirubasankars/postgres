@@ -12,3 +12,6 @@ postgresql_unix_user: postgres
 postgresql_unix_group: postgres
 # Distro postgresql.service must stay disabled — Patroni starts postgres.
 postgresql_manage_service: false
+# Remove a cluster left by pg_createcluster so Patroni can run initdb.
+# Never touches a data directory Patroni has already bootstrapped.
+postgresql_drop_packaged_cluster: true
