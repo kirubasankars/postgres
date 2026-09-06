@@ -1,0 +1,25 @@
+---
+patroni_version: 2.1.4
+patroni_package: "patroni=={{ patroni_version }}"
+patroni_kazoo_package: kazoo==2.8.0
+patroni_user: postgres
+patroni_group: postgres
+patroni_config_dir: /etc/patroni
+patroni_config_file: "{{ patroni_config_dir }}/patroni.yml"
+patroni_log_dir: /var/log/patroni
+patroni_rest_listen: 0.0.0.0:8008
+patroni_rest_port: 8008
+patroni_name: "{{ inventory_hostname }}"
+patroni_scope: "{{ cluster_name }}"
+patroni_namespace: "{{ cluster_namespace }}"
+patroni_ttl: 30
+patroni_loop_wait: 10
+patroni_retry_timeout: 10
+patroni_maximum_lag_on_failover: 1048576
+
+# Paths must live here (or in group_vars). PostgreSQL role defaults
+# are not visible while this role renders patroni.yml.
+postgresql_version: 14
+postgresql_port: 5432
+postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+postgresql_bin_dir: "/usr/lib/postgresql/{{ postgresql_version }}/bin"

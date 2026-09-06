@@ -1,0 +1,9 @@
+---
+- name: Install ZooKeeper binaries
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure ZooKeeper ensemble
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Manage ZooKeeper service
+  ansible.builtin.include_tasks: service.yml

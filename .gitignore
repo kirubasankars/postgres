@@ -1,0 +1,24 @@
+*.retry
+*.pyc
+__pycache__/
+.venv/
+venv/
+.env
+*.log
+
+# Ansible
+*.retry
+.cache/
+/tmp/
+
+# Secrets — never commit real vault passwords
+.vault_pass
+.vault_password
+vault_pass.txt
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+*~
+*.swp

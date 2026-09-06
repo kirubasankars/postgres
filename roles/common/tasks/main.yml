@@ -1,0 +1,16 @@
+---
+- name: Apply package baseline
+  ansible.builtin.include_tasks: packages.yml
+
+- name: Apply kernel tunables
+  ansible.builtin.include_tasks: sysctl.yml
+
+- name: Apply process limits
+  ansible.builtin.include_tasks: limits.yml
+
+- name: Apply cluster hostnames
+  ansible.builtin.include_tasks: hosts.yml
+
+- name: Apply host firewall
+  ansible.builtin.include_tasks: firewall.yml
+  when: common_enable_firewall | bool

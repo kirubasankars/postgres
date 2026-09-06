@@ -1,0 +1,5 @@
+---
+zookeeper_myid_override: 2
+patroni_name: pg-zk-02
+patroni_rest_connect: 10.20.30.12:8008
+postgres_connect_address: 10.20.30.12:5432

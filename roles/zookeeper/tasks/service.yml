@@ -1,0 +1,16 @@
+---
+- name: Install ZooKeeper systemd unit
+  ansible.builtin.template:
+    src: zookeeper.service.j2
+    dest: /etc/systemd/system/zookeeper.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart zookeeper
+
+- name: Enable and start ZooKeeper
+  ansible.builtin.systemd:
+    name: zookeeper
+    enabled: true
+    state: started
+    daemon_reload: true
